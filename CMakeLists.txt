@@ -13,3 +13,11 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 add_executable(histogram histogram.cpp)
 target_link_libraries(histogram ${OpenCV_LIBS})
 include_directories(${OpenCV_INCLUDE_DIRS})
+
+add_executable(simple_smooth simple_smooth.cpp)
+target_link_libraries(simple_smooth ${OpenCV_LIBS})
+include_directories(${OpenCV_INCLUDE_DIRS})
+
+add_executable(simple_sharpening simple_sharpening.cpp)
+target_link_libraries(simple_sharpening ${OpenCV_LIBS})
+include_directories(${OpenCV_INCLUDE_DIRS})
