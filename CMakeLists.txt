@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.17)
 project(opencv_demo)
+set(CMAKE_EXPORT_COMPILE_COMMANDS YES)
 
 set(CMAKE_CXX_STANDARD 17)
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/out)

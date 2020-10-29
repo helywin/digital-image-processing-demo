@@ -83,12 +83,18 @@ int main()
     Mat padded;
     copyMakeBorder(origin, padded, 0, r - origin.rows, 0, c - origin.cols, BORDER_CONSTANT, Scalar::all(0));
 
+    // 另一种搬移频谱到中间的办法
+    for (int i = 0; i < padded.rows * padded.cols; ++i) {
+        padded.at<uchar>(i) *= ((i / padded.cols + i % padded.cols) % 2 ? 1 : -1);
+    }
+
     // 创建复数矩阵存储数据
     Mat dst1[] = { Mat_<float>(padded), Mat::zeros(padded.size(), CV_32F)};
     Mat dst2;
     merge(dst1, 2, dst2);
     // 变换
     dft(dst2, dst2);
+
 
     //实部虚部分开
     split(dst2, dst1);
@@ -101,20 +107,20 @@ int main()
 
     magnitudeImage = magnitudeImage(Rect(0, 0, magnitudeImage.cols & -2, magnitudeImage.rows & -2));
 
-    int cx = magnitudeImage.cols / 2;
-    int cy = magnitudeImage.rows / 2;
-    Mat q0(magnitudeImage(Rect(0, 0, cx, cy)));
-    Mat q1(magnitudeImage(Rect(cx, 0, cx, cy)));
-    Mat q2(magnitudeImage(Rect(0, cy, cx, cy)));
-    Mat q3(magnitudeImage(Rect(cx, cy, cx, cy)));
-
-    Mat tmp;
-    q0.copyTo(tmp);
-    q3.copyTo(q0);
-    tmp.copyTo(q3);
-    q1.copyTo(tmp);
-    q2.copyTo(q1);
-    tmp.copyTo(q2);
+//    int cx = magnitudeImage.cols / 2;
+//    int cy = magnitudeImage.rows / 2;
+//    Mat q0(magnitudeImage(Rect(0, 0, cx, cy)));
+//    Mat q1(magnitudeImage(Rect(cx, 0, cx, cy)));
+//    Mat q2(magnitudeImage(Rect(0, cy, cx, cy)));
+//    Mat q3(magnitudeImage(Rect(cx, cy, cx, cy)));
+//
+//    Mat tmp;
+//    q0.copyTo(tmp);
+//    q3.copyTo(q0);
+//    tmp.copyTo(q3);
+//    q1.copyTo(tmp);
+//    q2.copyTo(q1);
+//    tmp.copyTo(q2);
 
     normalize(magnitudeImage, magnitudeImage, 0, 1, NORM_MINMAX);
     imshow("spectrum magnitude", magnitudeImage);

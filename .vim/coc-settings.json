@@ -1,0 +1,4 @@
+{
+    "clangd.compilationDatabasePath": "build",
+    "clangd.semanticHighlighting": true
+}
