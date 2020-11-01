@@ -27,3 +27,4 @@ target_link_libraries(dft ${OpenCV_LIBS} OpenMP::OpenMP_CXX)
 add_executable(butterworth butterworth.cpp)
 target_link_libraries(butterworth ${OpenCV_LIBS})
 
+file(COPY ${CMAKE_CURRENT_BINARY_DIR}/compile_commands.json DESTINATION ${CMAKE_SOURCE_DIR})

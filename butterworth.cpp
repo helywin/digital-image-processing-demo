@@ -74,28 +74,21 @@ int main()
     log(mag, mag);
     normalize(mag, mag, 0, 1, NORM_MINMAX);
     imshow("before magfilter", mag);
+    Mat gaussian = Mat_<float>::zeros(r, c);
 
     int d0 = 200;
     for (int i = 0; i < r; ++i) {
         for (int j = 0; j < c; ++j) {
-            auto &v1 = dst1[0].at<float>(i, j);
-            auto &v2 = dst1[1].at<float>(i, j);
-            v1 = v1 / ( 1 + pow(dist_func(i, j)/d0, 2.5));
-            v2 = v2 / ( 1 + pow(dist_func(i, j)/d0, 2.5));
+            gaussian.at<float>(i, j) = 1 / (1 + pow(dist_func(i, j)/d0, 2.5));
         }
     }
+    dst1[0] = dst1[0].mul(gaussian);
+    dst1[1] = dst1[1].mul(gaussian);
     magnitude(dst1[0], dst1[1], mag);
     log(mag, mag);
     normalize(mag, mag, 0, 1, NORM_MINMAX);
     imshow("magfilter", mag);
-    //polarToCart(mag, angle, dst1[0], dst1[1]);
     merge(dst1, 2, dst2);
-    //adjust(dst2);
-    split(dst2, dst1);
-    magnitude(dst1[0], dst1[1], mag);
-    log(mag, mag);
-    normalize(mag, mag, 0, 1, NORM_MINMAX);
-    imshow("magfilter1", mag);
 
     idft(dst2, dst2);
     split(dst2, dst1);
