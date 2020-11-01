@@ -10,11 +10,15 @@
 #include <iostream>
 #include <atomic>
 #include <cmath>
+#include <cassert>
+#include "dftshift.hpp"
 
 using namespace cv;
 using std::cout;
 using std::endl;
 using std::cerr;
+
+#define LOW_PASS
 
 int main()
 {
@@ -33,77 +37,57 @@ int main()
     merge(dst1, 2, dst2);
     // 变换
     dft(dst2, dst2);
-
-    int cx = c/2;
-    int cy = r/2;
-
-    auto adjust = [cx,cy](Mat dst) {
-        Mat q0(dst(Rect(0,0,cx,cy)));
-        Mat q1(dst(Rect(cx,0,cx,cy)));
-        Mat q2(dst(Rect(0,cy,cx,cy)));
-        Mat q3(dst(Rect(cx,cy,cx,cy)));
-    
-        Mat tmp;
-        q0.copyTo(tmp);
-        q3.copyTo(q0);
-        tmp.copyTo(q3);
-        q1.copyTo(tmp);
-        q2.copyTo(q1);
-        tmp.copyTo(q2);
-    };
-    adjust(dst2);
+    dftshift(dst2);
 
     //实部虚部分开
     split(dst2, dst1);
-    //Mat mag, angle;
-    //cartToPolar(dst1[0], dst1[1], mag, angle);
-    //magnitude(dst1[0], dst1[1], mag);
-    //phase(dst1[0], dst1[1], angle);
-    //normalize(angle, angle, 0, 1, NORM_MINMAX);
-    //imshow("phase", angle);
-    //waitKey();
 
     const int x_center = r / 2;
     const int y_center = c / 2;
     auto dist_func = [x_center, y_center](int x, int y) -> float {
-        return (x - x_center) * (x - x_center) + 
+        double d2 =  (x - x_center) * (x - x_center) + 
                (y - y_center) * (y - y_center);
+        return sqrt(d2);
     };
     Mat mag;
     magnitude(dst1[0], dst1[1], mag);
     log(mag, mag);
-    normalize(mag, mag, 0, 1, NORM_MINMAX);
+    normalize(mag, mag, 1, 0, NORM_MINMAX);
     imshow("before magfilter", mag);
     Mat gaussian = Mat_<float>::zeros(r, c);
 
-    int d0 = 200;
+#ifdef LOW_PASS
+    int d0 = 50; //滤波器半径
+#else
+    int d0 = 50; //滤波器半径
+#endif
     for (int i = 0; i < r; ++i) {
         for (int j = 0; j < c; ++j) {
-            gaussian.at<float>(i, j) = 1 / (1 + pow(dist_func(i, j)/d0, 2.5));
+#ifdef LOW_PASS
+            gaussian.at<float>(i, j) = 1 / (1 + pow(dist_func(i, j)/d0, 2.5 * 2));
+#else
+            gaussian.at<float>(i, j) = 1 / (1 + pow(d0/dist_func(i, j), 2.5 * 2));
+#endif
         }
     }
     dst1[0] = dst1[0].mul(gaussian);
     dst1[1] = dst1[1].mul(gaussian);
     magnitude(dst1[0], dst1[1], mag);
+#ifdef LOW_PASS
     log(mag, mag);
-    normalize(mag, mag, 0, 1, NORM_MINMAX);
-    imshow("magfilter", mag);
+#endif
+    normalize(mag, mag, 1, 0, NORM_MINMAX);
+    imshow("spectrum after filter", mag);
     merge(dst1, 2, dst2);
+
+    normalize(gaussian, gaussian, 1, 0, NORM_MINMAX);
+    imshow("filter", gaussian);
 
     idft(dst2, dst2);
     split(dst2, dst1);
     Mat after;
     magnitude(dst1[0], dst1[1], after);
     normalize(after, after, 1, 0, NORM_MINMAX);
-    //after  = after / r / c;
-    //double minv, maxv;
-    //minMaxLoc(after, &minv, &maxv, nullptr, nullptr);
-    //std::cout << "min: " << minv << "maxv: " << maxv << std::endl;
-    //after.convertTo(after, CV_8U);
-    //for (int i = 0; i < r * c; ++i) {
-    //    after.at<float>(i) *= ((i / c + i % c) % 2 ? -1 : 1);
-    //}
     imshow("butterworth fitered image", after);
     waitKey();
-
 }
