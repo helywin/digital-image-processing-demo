@@ -27,4 +27,7 @@ target_link_libraries(dft ${OpenCV_LIBS} OpenMP::OpenMP_CXX)
 add_executable(spectrum_filter spectrum_filter.cpp dftshift.cpp dftshift.hpp)
 target_link_libraries(spectrum_filter ${OpenCV_LIBS})
 
+add_executable(space_filtering space_filtering.cpp dftshift.cpp dftshift.hpp)
+target_link_libraries(space_filtering ${OpenCV_LIBS})
+
 file(COPY ${CMAKE_CURRENT_BINARY_DIR}/compile_commands.json DESTINATION ${CMAKE_SOURCE_DIR})
