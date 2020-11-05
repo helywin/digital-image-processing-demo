@@ -30,4 +30,7 @@ target_link_libraries(spectrum_filter ${OpenCV_LIBS})
 add_executable(space_filtering space_filtering.cpp dftshift.cpp dftshift.hpp)
 target_link_libraries(space_filtering ${OpenCV_LIBS})
 
+add_executable(turbulance turbulance.cpp dftshift.cpp dftshift.hpp)
+target_link_libraries(turbulance ${OpenCV_LIBS})
+
 file(COPY ${CMAKE_CURRENT_BINARY_DIR}/compile_commands.json DESTINATION ${CMAKE_SOURCE_DIR})
