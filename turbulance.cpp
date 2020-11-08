@@ -19,6 +19,7 @@ int main()
     //Mat padded;
     //copyMakeBorder(origin, padded, 0, r - origin.rows, 0, c - origin.cols, BORDER_REFLECT, Scalar::all(0));
     imshow("gakki", origin);
+
     Mat dst1[] = { Mat_<float>(origin), Mat::zeros(origin.size(), CV_32F)};
     Mat dst2;
     merge(dst1, 2, dst2);
@@ -51,9 +52,41 @@ int main()
     merge(dst1, 2, dst2);
     idft(dst2, dst2);
     split(dst2, dst1);
+
     magnitude(dst1[0], dst1[1], mag);
     //log(mag, mag);
     normalize(mag, mag, 0, 1, NORM_MINMAX);
+    mag *= 256;
+    mag.convertTo(mag, CV_8U);
     imshow("after turbulance", mag);
+    Mat with_noise = mag.clone();
+    randn(with_noise, 0, 20);
+    with_noise += mag;
+    imshow("after turbulance with noise", with_noise);
+
+    with_noise.convertTo(dst1[0], CV_32F);
+    dst1[1] = Mat::zeros(with_noise.size(), CV_32F);
+    merge(dst1, 2, dst2);
+    dft(dst2, dst2);
+    dftshift(dst2);
+
+    split(dst2, dst1);
+    magnitude(dst1[0], dst1[1], mag);
+    log(mag, mag);
+    normalize(mag, mag, 0, 1, NORM_MINMAX);
+    imshow("after reverse spectrum", mag);
+
+    dst1[0] = dst1[0].mul(1/ turbulance);
+    dst1[1] = dst1[1].mul(1/ turbulance);
+
+
+    merge(dst1, 2, dst2);
+    idft(dst2, dst2);
+    split(dst2, dst1);
+    magnitude(dst1[0], dst1[1], mag);
+    //log(mag, mag);
+    normalize(mag, mag, 0, 1, NORM_MINMAX);
+    imshow("after reverse", mag);
+
     waitKey();
 }
